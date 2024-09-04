@@ -1,8 +1,8 @@
 'use client'
 
-import { Box, Button, Stack, TextField, Paper, IconButton, Typography, Avatar } from '@mui/material'
+import { Box, Button, Stack, TextField, Paper, IconButton, Typography, Avatar, CircularProgress, Link } from '@mui/material'
 import { useState, useRef, useEffect } from 'react'
-import { Brightness4, Brightness7 } from '@mui/icons-material'
+import { Brightness4, Brightness7, Send } from '@mui/icons-material'
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -12,18 +12,18 @@ export default function Home() {
     },
   ])
   const [userInput, setUserInput] = useState('')
-  const [chatHistory, setChatHistory] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
 
-  const handleUserInput = async () => {
+  const sendMessage = async () => {
     if (!userInput.trim() || isLoading) return;
     setIsLoading(true);
 
+    const message = userInput.trim();
     setUserInput('');
-    setChatHistory((prevChat) => [
-      ...prevChat,
-      { role: 'user', content: userInput },
+    setMessages((messages) => [
+      ...messages,
+      { role: 'user', content: message },
       { role: 'assistant', content: '' },
     ]);
 
@@ -33,7 +33,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify([...chatHistory, { role: 'user', content: userInput }]),
+        body: JSON.stringify([...messages, { role: 'user', content: message }]),
       });
 
       if (!response.ok) {
@@ -47,9 +47,9 @@ export default function Home() {
         const { done, value } = await reader.read();
         if (done) break;
         const text = decoder.decode(value, { stream: true });
-        setChatHistory((prevChat) => {
-          let lastMessage = prevChat[prevChat.length - 1];
-          let otherMessages = prevChat.slice(0, prevChat.length - 1);
+        setMessages((messages) => {
+          let lastMessage = messages[messages.length - 1];
+          let otherMessages = messages.slice(0, messages.length - 1);
           return [
             ...otherMessages,
             { ...lastMessage, content: lastMessage.content + text },
@@ -58,8 +58,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error:', error);
-      setChatHistory((prevChat) => [
-        ...prevChat,
+      setMessages((messages) => [
+        ...messages,
         { role: 'assistant', content: "I'm sorry, but I encountered an error. Please try again later." },
       ]);
     } finally {
@@ -67,26 +67,26 @@ export default function Home() {
     }
   };
 
-  const handleKeyPress = (event) => {
+  const handleKeyDown = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      handleUserInput()
+      event.preventDefault();
+      sendMessage();
     }
-  }
+  };
 
-  const messagesEndRef = useRef(null)
+  const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
-  }
+    setDarkMode(!darkMode);
+  };
 
   return (
     <Box
@@ -104,6 +104,7 @@ export default function Home() {
         sx={{ position: 'fixed', top: 16, right: 16 }}
         onClick={toggleDarkMode}
         color="inherit"
+        aria-label="Toggle dark mode"
       >
         {darkMode ? <Brightness7 /> : <Brightness4 />}
       </IconButton>
@@ -172,7 +173,7 @@ export default function Home() {
             fullWidth
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             disabled={isLoading}
             variant="outlined"
             sx={{
@@ -183,13 +184,27 @@ export default function Home() {
           />
           <Button 
             variant="contained" 
-            onClick={handleUserInput}
+            onClick={sendMessage}
             disabled={isLoading}
             sx={{ minWidth: '100px', borderRadius: 4 }}
+            endIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Send />}
           >
-            {isLoading ? 'Sending...' : 'Send'}
+            {isLoading ? '' : 'Send'}
           </Button>
         </Stack>
+        <Box
+          mt={2}
+          textAlign="center"
+          color={darkMode ? '#ffffff' : '#000000'}
+        >
+          <Typography variant="body2">
+            Made with ❤️ by <Link href="https://www.linkedin.com/in/ayushmorbar/" target="_blank" rel="noopener" color="inherit">
+            Ayush Morbar
+          </Link> & <Link href="https://www.linkedin.com/company/offbeats/" target="_blank" rel="noopener" color="inherit">
+            Offbeats Developer Studio
+          </Link>
+          </Typography>
+        </Box>
       </Paper>
     </Box>
   )
