@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Stack, TextField, Paper, IconButton } from '@mui/material'
+import { Box, Button, Stack, TextField, Paper, IconButton, Typography, Avatar } from '@mui/material'
 import { useState, useRef, useEffect } from 'react'
 import { Brightness4, Brightness7 } from '@mui/icons-material'
 
@@ -97,6 +97,7 @@ export default function Home() {
       alignItems="center"
       bgcolor={darkMode ? '#121212' : '#f5f5f5'}
       p={2}
+      fontFamily="'Roboto', sans-serif"
     >
       <IconButton
         sx={{ position: 'fixed', top: 16, right: 16 }}
@@ -111,19 +112,33 @@ export default function Home() {
           width: '500px',
           height: '700px',
           p: 2,
-          borderRadius: 2,
+          borderRadius: 4,
           display: 'flex',
           flexDirection: 'column',
           bgcolor: darkMode ? '#424242' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
         }}
       >
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={2}
+          p={2}
+          borderBottom={`1px solid ${darkMode ? '#616161' : '#e0e0e0'}`}
+        >
+          <Box display="flex" alignItems="center">
+            <Avatar sx={{ bgcolor: darkMode ? 'primary.dark' : 'primary.main', mr: 2 }}>Q</Avatar>
+            <Typography variant="h6">Quixa</Typography>
+          </Box>
+        </Box>
         <Stack
           direction="column"
           spacing={2}
           flexGrow={1}
           overflow="auto"
           maxHeight="100%"
+          p={2}
         >
           {messages.map((message, index) => (
             <Box
@@ -137,9 +152,11 @@ export default function Home() {
                 sx={{
                   bgcolor: message.role === 'assistant' ? (darkMode ? 'primary.dark' : 'primary.main') : (darkMode ? 'secondary.dark' : 'secondary.main'),
                   color: 'white',
-                  borderRadius: 2,
+                  borderRadius: 4,
                   p: 2,
                   boxShadow: 1,
+                  maxWidth: '75%',
+                  wordWrap: 'break-word',
                 }}
               >
                 {message.content}
@@ -148,7 +165,7 @@ export default function Home() {
           ))}
           <div ref={messagesEndRef} />
         </Stack>
-        <Stack direction="row" spacing={2} mt={2}>
+        <Stack direction="row" spacing={2} mt={2} p={2}>
           <TextField
             label="Message"
             fullWidth
@@ -160,13 +177,14 @@ export default function Home() {
             sx={{
               bgcolor: darkMode ? '#616161' : '#ffffff',
               color: darkMode ? '#ffffff' : '#000000',
+              borderRadius: 4,
             }}
           />
           <Button 
             variant="contained" 
             onClick={sendMessage}
             disabled={isLoading}
-            sx={{ minWidth: '100px' }}
+            sx={{ minWidth: '100px', borderRadius: 4 }}
           >
             {isLoading ? 'Sending...' : 'Send'}
           </Button>
