@@ -11,20 +11,21 @@ export default function Home() {
       content: "Hi! I'm Quixa, your AI-powered support assistant. How can I help you today?",
     },
   ])
-  const [message, setMessage] = useState('')
+  const [userInput, setUserInput] = useState('')
+  const [chatHistory, setChatHistory] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
 
-  const sendMessage = async () => {
-    if (!message.trim() || isLoading) return
-    setIsLoading(true)
+  const handleUserInput = async () => {
+    if (!userInput.trim() || isLoading) return;
+    setIsLoading(true);
 
-    setMessage('')
-    setMessages((messages) => [
-      ...messages,
-      { role: 'user', content: message },
+    setUserInput('');
+    setChatHistory((prevChat) => [
+      ...prevChat,
+      { role: 'user', content: userInput },
       { role: 'assistant', content: '' },
-    ])
+    ]);
 
     try {
       const response = await fetch('/api/chat', {
@@ -32,44 +33,44 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify([...messages, { role: 'user', content: message }]),
-      })
+        body: JSON.stringify([...chatHistory, { role: 'user', content: userInput }]),
+      });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok')
+        throw new Error('Network response was not ok');
       }
 
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
 
       while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        const text = decoder.decode(value, { stream: true })
-        setMessages((messages) => {
-          let lastMessage = messages[messages.length - 1]
-          let otherMessages = messages.slice(0, messages.length - 1)
+        const { done, value } = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value, { stream: true });
+        setChatHistory((prevChat) => {
+          let lastMessage = prevChat[prevChat.length - 1];
+          let otherMessages = prevChat.slice(0, prevChat.length - 1);
           return [
             ...otherMessages,
             { ...lastMessage, content: lastMessage.content + text },
-          ]
-        })
+          ];
+        });
       }
     } catch (error) {
-      console.error('Error:', error)
-      setMessages((messages) => [
-        ...messages,
+      console.error('Error:', error);
+      setChatHistory((prevChat) => [
+        ...prevChat,
         { role: 'assistant', content: "I'm sorry, but I encountered an error. Please try again later." },
-      ])
+      ]);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      sendMessage()
+      handleUserInput()
     }
   }
 
@@ -169,8 +170,8 @@ export default function Home() {
           <TextField
             label="Message"
             fullWidth
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             variant="outlined"
@@ -182,7 +183,7 @@ export default function Home() {
           />
           <Button 
             variant="contained" 
-            onClick={sendMessage}
+            onClick={handleUserInput}
             disabled={isLoading}
             sx={{ minWidth: '100px', borderRadius: 4 }}
           >
