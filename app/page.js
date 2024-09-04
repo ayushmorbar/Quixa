@@ -198,7 +198,7 @@ export default function Home() {
           color={darkMode ? '#ffffff' : '#000000'}
         >
           <Typography variant="body2">
-            Made with ❤️ by <Link href="https://www.linkedin.com/in/ayushmorbar/" target="_blank" rel="noopener" color="inherit">
+            Made w ❤️ by <Link href="https://www.linkedin.com/in/ayushmorbar/" target="_blank" rel="noopener" color="inherit">
             Ayush Morbar
           </Link> & <Link href="https://www.linkedin.com/company/offbeats/" target="_blank" rel="noopener" color="inherit">
             Offbeats Developer Studio
